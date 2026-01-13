@@ -1,98 +1,182 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Entity } from "@/src/types";
+import { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const createEntity = (): Entity => ({
+  id: Date.now().toString(),
+  name: "",
+  ac: 0,
+  initiative: 0,
+  hp: 0,
+})
 
-export default function HomeScreen() {
+export default function InitiativeScreen() {
+  const [entities, setEntities] = useState<Entity[]>([]);
+
+  const addEntity = () => {
+    setEntities(e => [...e, createEntity()]);
+  }
+
+  const updateEntity = (id: string, patch: Partial<Entity>) => {
+    setEntities(e => e.map(ent => ent.id === id ? { ...ent, ...patch } : ent));
+  }
+
+  const removeEntity = (id: string) => {
+    setEntities(e => e.filter(ent => ent.id !== id))
+  }
+
+  const clearAll = () => {
+    setEntities([]);
+  }
+
+  const recalcInitiative = () => {
+    setEntities(e => [...e].sort((a, b) => b.initiative - a.initiative))
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.root}>
+      <Text style={styles.title}>
+        Трекер инициативы
+      </Text>
+      
+      <View style={styles.row}>
+        <Pressable style={styles.button} onPress={addEntity}>
+          <Text style={styles.buttonText}>+ Добавить</Text>
+        </Pressable>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+        <Pressable style={styles.button} onPress={recalcInitiative}>
+          <Text style={styles.buttonText}>↻ Пересчитать</Text>
+        </Pressable>
+
+        <Pressable style={[styles.button, styles.danger]} onPress={clearAll}>
+          <Text style={styles.buttonText}>✖ Очистить</Text>
+        </Pressable>
+      </View>
+
+      <ScrollView style={{ marginTop: 16 }}>
+        {entities.map(ent => (
+          <View key={ent.id} style={styles.card}>
+          <View>
+            <Text style={styles.label}>Имя</Text>
+            <TextInput
+              value={ent.name}
+              onChangeText={text =>
+                updateEntity(ent.id, { name: text })
+              }
+              style={styles.input}
+            />
+          </View>
+
+          <View style={styles.row}>
+            <View>
+              <Text style={styles.label}>Инициатива</Text>
+              <TextInput
+                keyboardType="numeric"
+                value={String(ent.initiative)}
+                onChangeText={text =>
+                  updateEntity(ent.id, {
+                    initiative: Number(text) || 0,
+                  })
+                }
+                style={styles.inputSmall}
+              />
+            </View>
+
+            <View>
+              <Text style={styles.label}>AC</Text>
+              <TextInput
+                value={String(ent.ac)}
+                onChangeText={text =>
+                  updateEntity(ent.id, { ac: Number(text) || 0 })
+                }
+                style={styles.input}
+              />
+            </View>
+
+            <View>
+              <Text style={styles.label}>HP</Text>
+              <TextInput
+                keyboardType="numeric"
+                value={String(ent.hp)}
+                onChangeText={text =>
+                  updateEntity(ent.id, {
+                    hp: Number(text) || 0,
+                  })
+                }
+                style={styles.inputSmall}
+              />
+            </View>
+
+            <Pressable
+              onPress={() => removeEntity(ent.id)}
+              style={{ justifyContent: "flex-end" }}
+            >
+              <Text style={styles.deleteText}>Удалить</Text>
+            </Pressable>
+          </View>
+        </View>
+        ))}
+      </ScrollView>
+    </View>
+  )
+
+  
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  root: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#111",
+  },
+  title: {
+    color: "#fff",
+    fontSize: 22,
+    marginBottom: 12,
+  },
+  row: {
+    flexDirection: "row",
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
+  button: {
+    backgroundColor: "#333",
+    padding: 10,
+    borderRadius: 6,
+  },
+  danger: {
+    backgroundColor: "#662222",
+  },
+  buttonText: {
+    color: "#fff",
+  },
+  label: {
+    color: "#aaa",
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  card: {
+    backgroundColor: "#1e1e1e",
+    padding: 10,
     marginBottom: 8,
+    borderRadius: 8,
+    gap: 6,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  input: {
+    flex: 1,
+    backgroundColor: "#333",
+    color: "#fff",
+    padding: 6,
+    borderRadius: 4,
   },
-});
+  inputSmall: {
+    width: 60,
+    backgroundColor: "#333",
+    color: "#fff",
+    padding: 6,
+    borderRadius: 4,
+    textAlign: "center",
+  },
+  deleteText: {
+    color: "#ff6666",
+  },
+})
