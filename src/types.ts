@@ -4,4 +4,5 @@ export type Entity = {
     ac: number
     initiative: number
     hp: number
+    maxHp: number
 }
