@@ -1,98 +1,37 @@
-# Welcome to your Expo app 👋
+# NRITracker 🎲
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Твой верный спутник в настольных ролевых играх!**
 
-## Get started
+NRITracker - это удобное мобильное приложение для мастеров и игроков, которое помогает вести боевые сцены без лишней суеты. Отслеживай инициативу всех участников боя, управляй здоровьем персонажей и врагов интуитивным слайдером, и бросай дайсы прямо в приложении. Больше никаких листочков, калькуляторов и путаницы — всё необходимое для динамичного боя в одном месте.
 
-1. Install dependencies
+## Возможности ✨
 
+- **📊 Трекер инициативы** - автоматическая сортировка участников боя по инициативе, быстрое добавление и удаление персонажей
+- **❤️ Управление здоровьем** - интуитивный слайдер для нанесения урона с визуализацией, ручной ввод для точных значений, отслеживание текущего и максимального HP
+- **🎲 Броски дайсов** - встроенный генератор случайных чисел для любых типов дайсов
+
+## Для разработчиков
+
+Это приложение создано с использованием [Expo](https://expo.dev) и React Native.
+
+### Установка и запуск
+
+1. Установите зависимости:
    ```bash
    npm install
    ```
 
-2. Start the app
-
+2. Запустите приложение:
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. Откройте приложение в:
+   - [Development build](https://docs.expo.dev/develop/development-builds/introduction/)
+   - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+   - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+   - [Expo Go](https://expo.dev/go)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Версия
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-
-```
-nritracker
-├─ app
-│  ├─ (tabs)
-│  │  ├─ explore.tsx
-│  │  ├─ index.tsx
-│  │  └─ _layout.tsx
-│  ├─ modal.tsx
-│  └─ _layout.tsx
-├─ app.json
-├─ assets
-│  └─ images
-│     ├─ favicon.png
-│     ├─ icon.png
-│     ├─ partial-react-logo.png
-│     ├─ react-logo.png
-│     ├─ react-logo@2x.png
-│     ├─ react-logo@3x.png
-│     └─ splash-icon.png
-├─ components
-│  ├─ external-link.tsx
-│  ├─ haptic-tab.tsx
-│  ├─ hello-wave.tsx
-│  ├─ parallax-scroll-view.tsx
-│  ├─ themed-text.tsx
-│  ├─ themed-view.tsx
-│  └─ ui
-│     ├─ collapsible.tsx
-│     ├─ icon-symbol.ios.tsx
-│     └─ icon-symbol.tsx
-├─ constants
-│  └─ theme.ts
-├─ eslint.config.js
-├─ hooks
-│  ├─ use-color-scheme.ts
-│  ├─ use-color-scheme.web.ts
-│  └─ use-theme-color.ts
-├─ package-lock.json
-├─ package.json
-├─ README.md
-├─ scripts
-│  └─ reset-project.js
-├─ src
-│  └─ types.ts
-└─ tsconfig.json
-
-```
+**v0.0.1** (драфт) - ранняя версия, функционал в разработке.
