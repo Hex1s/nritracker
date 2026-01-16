@@ -1,18 +1,17 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, SplashScreen } from 'expo-router';
+import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { ToastProvider } from "react-native-toast-notifications";
 import { TamaguiProvider } from 'tamagui';
-import config from '../tamagui.config';
 import HexSplash from '../components/HexSplash';
+import config from '../tamagui.config';
 
-// Предотвращаем автоматическое скрытие нативного Splash,
-// чтобы управлять им вручную после окончания наших анимаций.
 SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
@@ -31,7 +30,6 @@ export default function RootLayout() {
   useEffect(() => {
     if (!loaded) return;
 
-    // Даём анимации отыграть 1.3 секунды после загрузки шрифтов
     const timer = setTimeout(() => {
       setAppReady(true);
       SplashScreen.hideAsync();
@@ -45,31 +43,33 @@ export default function RootLayout() {
   }
 
   return (
-    <TamaguiProvider config={config} defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <ToastProvider
-          duration={2000}
-          swipeEnabled
-          offsetBottom={50}
-          placement='bottom'
-          renderToast={({ message }) => (
-            <View>
-              {typeof message === 'string' ? (
-                <Text style={styles.toastText}>{message}</Text>
-              ) : (
-                message
-              )}
-            </View>
-          )}
-        >
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          </Stack>
-        </ToastProvider>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </TamaguiProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <TamaguiProvider config={config} defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <ToastProvider
+            duration={2000}
+            swipeEnabled
+            offsetBottom={50}
+            placement='bottom'
+            renderToast={({ message }) => (
+              <View>
+                {typeof message === 'string' ? (
+                  <Text style={styles.toastText}>{message}</Text>
+                ) : (
+                  message
+                )}
+              </View>
+            )}
+          >
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+            </Stack>
+          </ToastProvider>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </TamaguiProvider>
+    </GestureHandlerRootView>
   );
 }
 

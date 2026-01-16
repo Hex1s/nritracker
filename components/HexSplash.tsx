@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -9,8 +9,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-// Простой анимированный шестигранник из View-элементов,
-// чтобы не тащить лишние зависимости и не усложнять машинный дух.
 
 const HEX_SIZE = 80;
 

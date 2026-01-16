@@ -16,6 +16,7 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@tamagui/font-inter": "^1.144.1",
+    "@tamagui/lucide-icons": "^1.144.1",
     "@tamagui/react-native-media-driver": "^1.144.1",
     "@tamagui/shorthands": "^1.144.1",
     "@tamagui/slider": "^1.144.1",

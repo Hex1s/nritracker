@@ -1,184 +1,165 @@
+import EntityCard from "@/components/ui/EntityCard";
 import { Entity } from "@/src/types";
-import { Slider } from "@tamagui/slider";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { Plus, RefreshCw, Trash } from "@tamagui/lucide-icons";
+import { useRef, useState } from "react";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
+} from "react-native";
 
-type Props = {
-  entity: Entity;
-  onHPChange: (hp: number) => void;
-  onMaxHPChange: (maxHp: number) => void;
-};
+/* =========================
+   InitiativeScreen
+   ========================= */
 
-const HPSlider = memo(({ entity, onHPChange, onMaxHPChange }: Props) => {
-  const slideStartHPRef = useRef<number | null>(null);
-  const latestValueRef = useRef<number>(entity.hp);
+const createEntity = (): Entity => ({
+  id: Date.now().toString(),
+  name: "",
+  ac: 0,
+  initiative: 0,
+  hp: 0,
+  maxHp: 0,
+});
 
-  const [, forceRender] = useState(0); // только для отображения дельты
+export default function InitiativeScreen() {
+  const [entities, setEntities] = useState<Entity[]>([]);
+  const scrollRef = useRef<ScrollView>(null);
+  const [sliding, setIsSliding] = useState(false);
 
-  // синхронизация при внешнем изменении hp
-  useEffect(() => {
-    if (slideStartHPRef.current === null) {
-      latestValueRef.current = entity.hp;
-      forceRender(v => v + 1);
-    }
-  }, [entity.hp]);
+  const addEntity = () => {
+    setEntities(e => [...e, createEntity()]);
+  };
 
-  const handleSlideStart = useCallback(() => {
-    slideStartHPRef.current = entity.hp;
-    latestValueRef.current = entity.hp;
-    forceRender(v => v + 1);
-  }, [entity.hp]);
+  const updateEntity = (id: string, patch: Partial<Entity>) => {
+    setEntities(e =>
+      e.map(ent => (ent.id === id ? { ...ent, ...patch } : ent))
+    );
+  };
 
-  const handleValueChange = useCallback((vals: number[]) => {
-    latestValueRef.current = vals[0];
-    forceRender(v => v + 1); // ТОЛЬКО визуал, thumb двигается нативно
-  }, []);
+  const removeEntity = (id: string) => {
+    setEntities(e => e.filter(ent => ent.id !== id));
+  };
 
-  const handleSlideEnd = useCallback(() => {
-    if (slideStartHPRef.current !== null) {
-      onHPChange(latestValueRef.current);
-      slideStartHPRef.current = null;
-      forceRender(v => v + 1);
-    }
-  }, [onHPChange]);
-  const slideStartHP = slideStartHPRef.current;
+  const clearAll = () => {
+    setEntities([]);
+  };
 
-  const isSliding = slideStartHP !== null;
-  const delta = isSliding
-    ? latestValueRef.current - slideStartHP
-    : 0;
-
-  const hpPercent = entity.maxHp > 0
-    ? latestValueRef.current / entity.maxHp
-    : 0;
-
-  const getColor = (percent: number) => {
-    if (percent <= 0.25) return "#ff4444";
-    if (percent <= 0.5) return "#ffaa00";
-    return "#44ff44";
+  const recalcInitiative = () => {
+    setEntities(e =>
+      [...e].sort((a, b) => b.initiative - a.initiative)
+    );
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    });
   };
 
   return (
-    <View style={{ marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: "#333" }}>
-      {/* Header */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-          <Text style={{ color: "#aaa", fontSize: 14 }}>HP:</Text>
+    <View style={styles.root}>
+      <Text style={styles.title}>Трекер инициативы</Text>
 
-          <TextInput
-            keyboardType="numeric"
-            value={String(entity.hp)}
-            onChangeText={text => {
-              const newHP = Number(text) || 0;
-              onHPChange(Math.min(newHP, entity.maxHp));
-            }}
-            style={{
-              backgroundColor: "#333",
-              color: "#fff",
-              padding: 4,
-              borderRadius: 4,
-              textAlign: "center",
-              fontSize: 16,
-              fontWeight: "bold",
-              minWidth: 50,
-            }}
-          />
-
-          <Text style={{ color: "#aaa", fontSize: 14 }}>/</Text>
-
-          <TextInput
-            keyboardType="numeric"
-            value={String(entity.maxHp)}
-            onChangeText={text => {
-              const newMax = Number(text) || 0;
-              onMaxHPChange(newMax);
-            }}
-            style={{
-              backgroundColor: "#333",
-              color: "#fff",
-              padding: 4,
-              borderRadius: 4,
-              textAlign: "center",
-              fontSize: 16,
-              fontWeight: "bold",
-              minWidth: 50,
-            }}
-          />
+      <ScrollView ref={scrollRef} scrollEnabled={!sliding} style={{ marginTop: 16, flex: 1 }}>
+        <View style={{ flexDirection: "column", gap: 12 }}>
+          {entities.map((ent, i) => (
+            <EntityCard onSlideStart={() => setIsSliding(true)} onSlideEnd={() => setIsSliding(false)} idx={i + 1} key={ent.id} entity={ent} updateEntity={updateEntity} removeEntity={removeEntity} />
+          ))}
         </View>
+      </ScrollView>
+      <View style={styles.nav}>
+        <Pressable style={styles.button} onPress={addEntity}>
+          <Plus color={"#fff"} />
+        </Pressable>
 
-        <Text
-          style={{
-            color: entity.hp < entity.maxHp ? "#ff6666" : "#666",
-            fontSize: 14,
-            fontWeight: "bold",
-            paddingHorizontal: 8,
-            paddingVertical: 2,
-            borderRadius: 4,
-            backgroundColor: entity.hp < entity.maxHp ? "#331111" : "#222",
-          }}
+        <Pressable
+          style={[styles.button, styles.buttonRecalc]}
+          onPress={recalcInitiative}
         >
-          {entity.hp < entity.maxHp ? `-${entity.maxHp - entity.hp}` : "✓"}
-        </Text>
-      </View>
+          <RefreshCw color={"#fff"} />
+        </Pressable>
 
-      {/* Slider */}
-      <View style={{ paddingHorizontal: 16, paddingVertical: 20 }}>
-        <Slider
-          defaultValue={[entity.hp]}
-          min={0}
-          max={entity.maxHp}
-          step={1}
-          onSlideStart={handleSlideStart}
-          onValueChange={handleValueChange}
-          onSlideEnd={handleSlideEnd}
+        <Pressable
+          style={[styles.button, styles.danger]}
+          onPress={clearAll}
         >
-          <Slider.Track backgroundColor="#333" height={8} borderRadius={4}>
-            <Slider.TrackActive backgroundColor={getColor(hpPercent)} />
-          </Slider.Track>
-
-          <Slider.Thumb
-            index={0}
-            circular
-            size={24}
-            backgroundColor="#fff"
-            borderWidth={2}
-            borderColor={getColor(hpPercent)}
-            alignItems="center"
-            justifyContent="center"
-          >
-            {isSliding && delta !== 0 && (
-              <View
-                style={{
-                  position: "absolute",
-                  top: -42,
-                  backgroundColor: "#000",
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
-                  borderRadius: 6,
-                  borderWidth: 2,
-                  borderColor: delta < 0 ? "#ff4444" : "#44ff44",
-                  minWidth: 70,
-                }}
-              >
-                <Text
-                  style={{
-                    color: delta < 0 ? "#ff4444" : "#44ff44",
-                    fontSize: 15,
-                    fontWeight: "bold",
-                    textAlign: "center",
-                  }}
-                  numberOfLines={1}
-                >
-                  {delta > 0 ? "+" : ""}
-                  {delta}
-                </Text>
-              </View>
-            )}
-          </Slider.Thumb>
-        </Slider>
+          <Trash color={"#fff"} />
+        </Pressable>
       </View>
     </View>
   );
-});
+}
 
-export default HPSlider;
+/* =========================
+   Styles
+   ========================= */
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    paddingTop: 26,
+    paddingHorizontal: 12,
+    backgroundColor: "#111",
+  },
+  title: {
+    color: "#fff",
+    fontSize: 22,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  nav: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 32,
+    padding: 8,
+    backgroundColor: "rgba(0, 0, 0, 0)",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "fixed",
+    zIndex: 10,
+  },
+  button: {
+    backgroundColor: "#333",
+    padding: 10,
+    borderRadius: 6,
+  },
+  buttonRecalc: {
+    backgroundColor: "#267f4a"
+  },
+  danger: {
+    backgroundColor: "#662222",
+  },
+  buttonText: {
+    color: "#fff",
+  },
+  label: {
+    color: "#aaa",
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  card: {
+    backgroundColor: "#1e1e1e",
+    padding: 10,
+    marginBottom: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  input: {
+    backgroundColor: "#333",
+    color: "#fff",
+    padding: 6,
+    borderRadius: 4,
+  },
+  inputSmall: {
+    width: 60,
+    backgroundColor: "#333",
+    color: "#fff",
+    padding: 6,
+    borderRadius: 4,
+    textAlign: "center",
+  },
+  deleteText: {
+    color: "#ff6666",
+  },
+});

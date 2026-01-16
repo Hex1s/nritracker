@@ -83,13 +83,13 @@ export default function DiceScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    padding: 16,
+    paddingTop: 26,
+    paddingHorizontal: 12,
     backgroundColor: "#111",
   },
   title: {
     color: "#fff",
     fontSize: 22,
-    marginBottom: 12,
   },
   card: {
     backgroundColor: "#1e1e1e",
